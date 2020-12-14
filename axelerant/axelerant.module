@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Contains axelerant.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function axelerant_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the axelerant module.
+    case 'help.page.axelerant':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Axelerant Interview Assignment') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function axelerant_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+	// Check for System Site Information form.
+	if ('system_site_information_settings' == $form_id) {
+
+		// Fetch system site configuration object.
+		$config = \Drupal::config('system.site');
+		// Fetch siteapikey value.
+		$site_api_key = $config->get('siteapikey');
+
+		// Site API Information details.
+		$form['site_api_information'] = [
+      '#type' => 'details',
+      '#title' => t('Site API details'),
+      '#open' => TRUE,
+    ];
+    // Site API Key textfield.
+    $form['site_api_information']['site_api_key'] = [
+      '#type' => 'textfield',
+      '#title' => t('Site API Key'),
+      '#default_value' => !empty($site_api_key) ? $site_api_key : t('No API Key yet'),
+      '#required' => TRUE,
+    ];
+
+    // Change subit button text if API key is set
+    if (!empty($site_api_key)) {
+    	$form['actions']['submit']['#value'] = t('Update Configuration');
+    }
+
+    // Add custom validate handler for site api key.
+    $form['#validate'][] = 'axelerant_api_key_validate';
+
+    // Add custom submit handler for saving site api key.
+    $form['#submit'][] = 'axelerant_api_key_submit';
+	}
+}
+
+/**
+ * Custom validate handlder for Site API Key.
+ */
+function axelerant_api_key_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+	// Fetch Site API Key.
+	$site_api_key = $form_state->getValue('site_api_key');
+
+	// Check for alphanumeric value without special character(s).
+	if(preg_match("/[^a-z_\-0-9]/i", $site_api_key)) {
+	  $form_state->setErrorByName('site_api_key', t("Site API Key '%site_api_key' should be only alphanumeric without any special character(s).", ['%site_api_key' => $site_api_key]));
+	}
+}
+
+/**
+ * Custom submit handlder for Site API Key.
+ */
+function axelerant_api_key_submit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+	\Drupal::service('config.factory')->getEditable('system.site')
+		->set('siteapikey', $form_state->getValue('site_api_key'))
+		->save();
+
+	\Drupal::messenger()->addMessage('Site API Key has been saved successfully!');
+}
