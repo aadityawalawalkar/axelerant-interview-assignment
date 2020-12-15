@@ -49,7 +49,7 @@ function axelerant_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
       '#required' => TRUE,
     ];
 
-    // Change subit button text if API key is set
+    // Change subit button text if API key is set.
     if (!empty($site_api_key)) {
     	$form['actions']['submit']['#value'] = t('Update Configuration');
     }
@@ -70,7 +70,7 @@ function axelerant_api_key_validate(&$form, \Drupal\Core\Form\FormStateInterface
 	$site_api_key = $form_state->getValue('site_api_key');
 
 	// Check for alphanumeric value without special character(s).
-	if(preg_match("/[^a-z_\-0-9]/i", $site_api_key)) {
+	if (preg_match("/[^a-z_\-0-9]/i", $site_api_key)) {
 	  $form_state->setErrorByName('site_api_key', t("Site API Key '%site_api_key' should be only alphanumeric without any special character(s).", ['%site_api_key' => $site_api_key]));
 	}
 }
@@ -79,9 +79,11 @@ function axelerant_api_key_validate(&$form, \Drupal\Core\Form\FormStateInterface
  * Custom submit handlder for Site API Key.
  */
 function axelerant_api_key_submit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+	// Store site api key in system.site config object.
 	\Drupal::service('config.factory')->getEditable('system.site')
 		->set('siteapikey', $form_state->getValue('site_api_key'))
 		->save();
 
+	// Success message.
 	\Drupal::messenger()->addMessage('Site API Key has been saved successfully!');
 }

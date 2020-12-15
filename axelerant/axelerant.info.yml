@@ -3,8 +3,3 @@ type: module
 description: 'Axelerant Interview Assignment'
 core: 8.x
 package: 'Custom'
-dependencies:
-  - rest
-  - serialization
-  - hal
-  - jsonapi
