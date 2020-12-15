@@ -5,6 +5,7 @@ namespace Drupal\axelerant\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Class PageNodeController.
@@ -15,6 +16,8 @@ class PageNodeController extends ControllerBase {
    * Fetch Node Details.
    *
    * @param object $request
+   *   Request object.
+   *
    * @return json
    *   Return node data in json format.
    */
@@ -36,7 +39,7 @@ class PageNodeController extends ControllerBase {
       // Fetch node details.
       $node_obj = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
 
-      /**
+      /*
        * Check if node:
        * a) node exists.
        * b) is of type page.
@@ -56,7 +59,7 @@ class PageNodeController extends ControllerBase {
     }
 
     // Throw Access Denied error.
-    throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException();
+    throw new AccessDeniedHttpException();
 
   }
 
